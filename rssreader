@@ -1,0 +1,6 @@
+#!/bin/ksh
+# dependencies: curl, xmlstarlet
+
+while read feed ; do
+   curl --retry 3 --silent $feed | sed '/^$/d' | xmlstarlet tr --omit-decl rss2txt.xsl
+done <~/.rssreader
