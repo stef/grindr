@@ -1,6 +1,83 @@
-#!/bin/ksh
-# dependencies: curl, xmlstarlet
+#!/bin/ksh -x 
+# dependencies: curl, xmlstarlet, dzen2, imagemagick
 
-while read feed ; do
-   curl --retry 3 --silent $feed | sed '/^$/d' | xmlstarlet tr --omit-decl rss2txt.xsl
-done <~/.rssreader
+display() {
+   FONT="-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*"
+   RESOLUTIONX=1024
+   RESOLUTIONY=768
+   FONTWIDTH=6
+   FONTHEIGHT=12
+   BORDERX=12
+   BORDERY=13
+
+   H=`print -- "${1}" | wc -l `
+   W=`print -- "${1}" | wc -L `
+   N=$((H - 1))
+   WIDTH=$((RESOLUTIONX / 2))
+   HEIGHT=$((BORDERY + FONTHEIGHT * H))
+   X=$((RESOLUTIONX / 2))
+   Y=0
+
+   [[ 3 -lt "$N" ]] && N=3
+   [[ 0 -lt "$N" ]] && lines="-l $N"
+   OPTIONS="$lines -x $X -y $Y -w $WIDTH -p -ta l -sa l"
+   
+   print -- "${1}" | SHELL=/bin/ksh dzen2 $OPTIONS -fn $FONT -e "$2;entertitle=uncollapse;leavetitle=collapse;button3=exit;button4=scrollup;button5=scrolldown;"
+}
+
+feedcnt=0
+itemcnt=0
+tmpfile=$(mktemp)
+cat ~/.rssreader | while read feed ; do
+   feedcnt=$((feedcnt +1))
+   cachefile=/tmp/rssreader-cache-$feedcnt
+   
+   # get feed
+   curl --retry 3 --silent $feed | 
+      sed '/^$/d' >$tmpfile
+
+   # get feed icon
+   curl -s -k $(xmlstarlet sel -TBD -t -m "/rss/channel/image/url" -v "." $tmpfile) 2>/dev/null |
+      convert - ${cachefile}.logo.xpm
+
+   # process feed
+   newitemcnt=0
+   
+   # get changes
+   xmldiff -x $cachefile $tmpfile |
+       # only retrieve added items, other changes are ignored
+       xmlstarlet tr --omit-decl getnewitems.xsl |
+       # clean up items
+       sed -e '/^[ 	]*$/d'  -e 's/^[ 	]*//' |
+       # retrieve only item or all
+       sed -n "${1:-1},${1:-$}p" |
+       while read newitem; do
+          # get added item
+          xmlstarlet sel -TBD -t -m "${newitem}/following-sibling::item[1]" -c "." $tmpfile | 
+            # convert item to text
+            xmlstarlet tr --omit-decl item2txt.xsl | 
+            # parse item
+            while read itemdata; do
+               case $itemdata in 
+                  T:*) title=${itemdata##T:} continue;;
+                  B:*) body=${itemdata##B:} continue;;
+                  D:*) date=${itemdata##D:} continue;;
+                  A:*) author=${itemdata##A:} continue;;
+                  *) [[ -n "$body" ]] && body="${body}\n${itemdata}";;
+               esac
+            done
+
+            if [[ -z "$output" ]]; then 
+               output="$author $title"
+            else
+               output="${output}\n$author: $title"
+            fi
+            newitemcnt=$((newitemcnt+1))
+       done
+    itemcnt=$((itemcnt + newitemcnt))
+done 
+
+output="^fg(red)[${itemcnt}]^fg() ${output}"
+display "$output" "button1=exec:/home/stef/bin/rssreader 1,exit;"
+
+#rm $tmpfile
