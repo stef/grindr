@@ -1,4 +1,4 @@
-#!/bin/ksh -x 
+#!/bin/ksh -x
 #
 # rsksh v1.0 - rss feed notifier
 #
@@ -42,7 +42,7 @@ display() {
    [[ 0 -lt "$N" ]] && lines="-l $N"
    OPTIONS="$lines -x $X -y $Y -w $WIDTH -p -ta l -sa l"
    
-   print -- "${1}" | SHELL=/bin/ksh dzen2 $OPTIONS -fn $FONT -e "$2;entertitle=uncollapse;leavetitle=collapse;button3=exit;button4=scrollup;button5=scrolldown;"
+   print -- "${1}" | SHELL=/bin/ksh dzen2 $OPTIONS -fn $FONT #-e "$2;button3=exit;button4=scrollup;button5=scrolldown;"
 }
 
 feedcnt=0
@@ -51,6 +51,7 @@ tmpfile=$(mktemp)
 cat ~/.rssreader | while read feed ; do
    feedcnt=$((feedcnt +1))
    cachefile=/tmp/rssreader-cache-$feedcnt
+   [[ ! -f "$cachefile" ]] && echo '<rss version="2.0"><channel /></rss>' >$cachefile
    
    # get feed
    curl --retry 3 --silent $feed | 
@@ -65,6 +66,8 @@ cat ~/.rssreader | while read feed ; do
    
    # get changes
    xmldiff -x $cachefile $tmpfile |
+       # clean up converted amps
+       sed -e 's/&/&amp;/g' | 
        # only retrieve added items, other changes are ignored
        xmlstarlet tr --omit-decl getnewitems.xsl |
        # clean up items
@@ -80,10 +83,8 @@ cat ~/.rssreader | while read feed ; do
             while read itemdata; do
                case $itemdata in 
                   T:*) title=${itemdata##T:} continue;;
-                  B:*) body=${itemdata##B:} continue;;
-                  D:*) date=${itemdata##D:} continue;;
                   A:*) author=${itemdata##A:} continue;;
-                  *) [[ -n "$body" ]] && body="${body}\n${itemdata}";;
+                  D:*) date=${itemdata##D:} continue;;
                esac
             done
 
@@ -98,6 +99,6 @@ cat ~/.rssreader | while read feed ; do
 done 
 
 output="^fg(red)[${itemcnt}]^fg() ${output}"
-display "$output" "button1=exec:/home/stef/bin/rssreader 1,exit;"
+display "$output" 
 
 #rm $tmpfile

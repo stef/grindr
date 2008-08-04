@@ -5,8 +5,8 @@
    <xsl:strip-space elements="*"/>
    <xsl:template match="item" >
 T:<xsl:value-of select="title" />
-D:<xsl:value-of select="pubDate" /> 
 A:<xsl:value-of select="author" /> 
-B:<xsl:value-of select="description" />
+D:<xsl:value-of select="pubDate" />
+
    </xsl:template>
 </xsl:stylesheet>
