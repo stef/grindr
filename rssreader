@@ -1,6 +1,6 @@
 #!/bin/ksh -x
 #
-# rsksh v1.0 - rss feed notifier
+# rsksh v0.2 - rss feed notifier
 #
 #     Copyright (C) 2008  Stefan Marsiske
 # 
@@ -31,15 +31,20 @@ tmpfile=$(mktemp)
 cat ~/.rssreader | while read feed ; do
    feedcnt=$((feedcnt +1))
    cachefile=/tmp/rssreader-cache-$feedcnt
-   [[ ! -f "$cachefile" ]] && echo '<rss version="2.0"><channel /></rss>' >$cachefile
+   [[ ! -f "$cachefile" ]] && 
    
    # get feed
    curl --retry 3 --silent $feed | 
       sed '/^$/d' >$tmpfile
+   [[ ! -f "$cachefile" ]] && [[ -r "$tmpfile" ]] && cp "$tmpfile" "$cachefile"
 
    # get feed icon
-   curl -s -k $(xmlstarlet sel -TBD -t -m "/rss/channel/image/url" -v "." $tmpfile) 2>/dev/null |
-      convert - ${cachefile}.logo.xpm
+   unset icon
+   [[ ! -r ${cachefile}.logo.xpm ]] && 
+      curl -s -k $(xmlstarlet sel -TBD -t -m "/rss/channel/image/url" -v "." $tmpfile) 2>/dev/null |
+         convert -resize 12 - ${cachefile}.logo.xpm
+   [[ -f ${cachefile}.logo.xpm ]] &&
+      icon="^i(${cachefile}.logo.xpm) "
 
    # get changes
    xmldiff -x $cachefile $tmpfile |
@@ -66,9 +71,9 @@ cat ~/.rssreader | while read feed ; do
             done
 
             if [[ -z "$output" ]]; then 
-               output="$title\n$author: $title"
+               output="${icon}$title\n${icon}$author: $title"
             else
-               output="${output}\n$author: $title"
+               output="${output}\n${icon}$author: $title"
             fi
             echo "$author: $title%%${newitem}/following-sibling::item[1]" >>$ITEMCACHE
 
