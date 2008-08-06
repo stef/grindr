@@ -21,29 +21,9 @@
 # you'll need these to use rsksh:
 # apt-get install curl xmlstarlet dzen2 imagemagick
 
-display() {
-   FONT="-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*"
-   RESOLUTIONX=1024
-   RESOLUTIONY=768
-   FONTWIDTH=6
-   FONTHEIGHT=12
-   BORDERX=12
-   BORDERY=13
+. $HOME/.rskshrc
 
-   H=`print -- "${1}" | wc -l `
-   W=`print -- "${1}" | wc -L `
-   N=$((H - 1))
-   WIDTH=$((RESOLUTIONX / 2))
-   HEIGHT=$((BORDERY + FONTHEIGHT * H))
-   X=$((RESOLUTIONX / 2))
-   Y=0
-
-   [[ 3 -lt "$N" ]] && N=3
-   [[ 0 -lt "$N" ]] && lines="-l $N"
-   OPTIONS="$lines -x $X -y $Y -w $WIDTH -p -ta l -sa l"
-   
-   print -- "${1}" | SHELL=/bin/ksh dzen2 $OPTIONS -fn $FONT #-e "$2;button3=exit;button4=scrollup;button5=scrolldown;"
-}
+#### end of config ####
 
 feedcnt=0
 itemcnt=0
@@ -61,9 +41,6 @@ cat ~/.rssreader | while read feed ; do
    curl -s -k $(xmlstarlet sel -TBD -t -m "/rss/channel/image/url" -v "." $tmpfile) 2>/dev/null |
       convert - ${cachefile}.logo.xpm
 
-   # process feed
-   newitemcnt=0
-   
    # get changes
    xmldiff -x $cachefile $tmpfile |
        # clean up converted amps
@@ -89,16 +66,17 @@ cat ~/.rssreader | while read feed ; do
             done
 
             if [[ -z "$output" ]]; then 
-               output="$author $title"
+               output="$title\n$author: $title"
             else
                output="${output}\n$author: $title"
             fi
-            newitemcnt=$((newitemcnt+1))
+            echo "$author: $title%%${newitem}/following-sibling::item[1]" >>$ITEMCACHE
+
+            itemcnt=$((itemcnt+1))
        done
-    itemcnt=$((itemcnt + newitemcnt))
+    mv $tmpfile $cachefile
 done 
 
-output="^fg(red)[${itemcnt}]^fg() ${output}"
-display "$output" 
+output="^tw()^fg(red)[${itemcnt}]^fg() ${output}"
+print "$output" >$DZENFEED
 
-#rm $tmpfile

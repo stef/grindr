@@ -1,0 +1,38 @@
+#!/bin/ksh
+#
+# rsksh v1.0 - rss feed notifier
+#
+#     Copyright (C) 2008  Stefan Marsiske
+# 
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+###########
+# you'll need these to use rsksh:
+# apt-get install curl xmlstarlet dzen2 imagemagick
+
+. $HOME/.rskshrc
+
+FONT="-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*"
+RESOLUTIONX=1024
+RESOLUTIONY=768
+LINES=6
+
+X=$((RESOLUTIONX / 2))
+Y=$((RESOLUTIONY - 15))
+WIDTH=$((RESOLUTIONX / 2))
+
+tail -f $DZENFEED | SHELL=/bin/ksh dzen2 -m -l $LINES -x $X -y $Y -w $WIDTH -p -ta l -sa l -fn $FONT -e "entertitle=uncollapse,grabkeys,scrollhome;enterslave=grabkeys;leaveslave=collapse,ungrabkeys;button1=menuprint;button2=exit:13;button4=scrollup;button5=scrolldown;key_Escape=ungrabkeys,exit" | 
+   while read command; do
+      print $command
+   done
