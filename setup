@@ -1,0 +1,6 @@
+#!/bin/ksh
+
+INSTALLDIR=~/.dzen
+
+mkdir -p $INSTALLDIR
+mkfifo $INSTALLDIR/.notifications
