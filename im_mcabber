@@ -29,7 +29,7 @@ dt=`date "+%H:%M:%S"`
    $CMD_MSG_IN > /dev/null 2>&1
    [[ -n "$filename" ]]  && [[ -f "$filename" ]] && {
      # We could process filename here...
-     . $HOME/.rskshrc
+     . $HOME/.korngatorrc
      (printf "^tw()^fg(red)${arg2}:^fg()"; cat $filename) >$DZENFEED
      /bin/rm $filename
   }

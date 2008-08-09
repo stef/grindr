@@ -21,7 +21,7 @@
 # you'll need these to use rsksh:
 # apt-get install curl xmlstarlet dzen2 imagemagick xmldiff
 
-. $HOME/.rskshrc
+. $HOME/.korngatorrc
 
 #### end of config ####
 
