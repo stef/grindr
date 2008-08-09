@@ -41,7 +41,9 @@ cat ${RSSLIST} | while read feed ; do
    unset icon
    [[ ! -r ${cachefile}.logo.xpm ]] && 
       curl -s -k $(xmlstarlet sel -TBD -t -m "/rss/channel/image/url" -v "." $tmpfile) 2>/dev/null |
-         convert -resize 12 - ${cachefile}.logo.xpm
+         # fail silently when conversion fails
+         #convert -identify -resize 12 - ${cachefile}.logo.xpm 2>/dev/null 1>&2 
+         convert -identify -resize 12 - ${cachefile}.logo.xpm
    [[ -f ${cachefile}.logo.xpm ]] &&
       icon="^i(${cachefile}.logo.xpm) "
 
@@ -81,6 +83,4 @@ cat ${RSSLIST} | while read feed ; do
     mv $tmpfile $cachefile
 done 
 
-output="^tw()^fg(red)[${itemcnt}]^fg() ${output}"
-print "$output" >$DZENFEED
-rm $tmpfile
+print "^tw()^fg(red)[${itemcnt}]^fg() ${output}" >$DZENFEED
