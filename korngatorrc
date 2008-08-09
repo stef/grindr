@@ -18,7 +18,7 @@ LINES=6
 
 # rsksh stuff
 RSSLIST="$BASE/rsslist"
-   [[ ! -r "RSSLIST" ]] && echo "http://yompb.wordpress.com/feed/" >"$RSSLIST"
+   [[ ! -r "$RSSLIST" ]] && printf "http://yompb.wordpress.com/feed/\nhttp://rss.slashdot.org/Slashdot/slashdot" >"$RSSLIST"
 RSSCACHE="$BASE/rsscache"
 # let's do some more automagic
    [[ ! -d "$RSSCACHE" ]] && mkdir -p "$RSSCACHE"
