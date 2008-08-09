@@ -2,5 +2,7 @@
 
 INSTALLDIR=~/.dzen
 
-mkdir -p $INSTALLDIR
-mkfifo $INSTALLDIR/.notifications
+[[ ! -d $INSTALLDIR ]] && mkdir -p $INSTALLDIR
+[[ ! -p $INSTALLDIR/.notifications ]] && mkfifo $INSTALLDIR/.notifications
+[[ ! -r ~/.rskshrc ]] && cp rskshrc ~/.rskshrc
+[[ ! -r ~/.rssreader ]] && cp .rssreader ~/.rssreader

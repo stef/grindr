@@ -1,2 +1,2 @@
-DZENFEED=$HOME/.dzen/rssfeed
+DZENFEED=$HOME/.dzen/.notifications
 ITEMCACHE=$HOME/.dzen/rsscache
