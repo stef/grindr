@@ -1,0 +1,45 @@
+korngator
+========
+kornshell based scripts for feeding dzen with im and rss items.
+
+dependencies
+------------
+apt-get install ksh curl xmlstarlet dzen2 imagemagick xmldiff
+
+usage (in five easy steps)
+--------------------------
+
+    * take care of the dependencies above!
+    * use ./setup or copy manually: cp korngatorrc ~/.korngatorrc
+    * run nbox, so it can poll the pipe.
+    * mcabber should be configured to the comments below, im messages should appear in the nbox accompanied by a sound.
+    * if you run rssreader it will fetch the feeds and send any new items to nbox none of the above need any parameters on the commandline.
+
+files
+-----
+* getnewitems.xsl
+   extracts added rss items from a feed (used by xmldiff in rsksh)
+* im_mcabber*
+   can be used by mcabber by setting in ~/.mcabberrc
+      set events_command = <path>im_mcabber
+      set event_log_files = 1
+      set event_log_dir = ~/.mcabber/event_files
+   make sure, that ~/.mcabber/event_files exists:
+      mkdir -p ~/.mcabber/event_files
+* item2txt.xsl
+   extracts title, author, pubdate info out of rss2.0 items (used in rsksh
+   by xmlstar)
+* nbox
+   polls the notifications and displays them in a dzen widget at the bottom
+   right of your screen. hover over the widget and you get a scrollable
+   backlog of all previous events. comming up, klicking on events makes
+   something meaningful.
+* rsksh
+   reads the contents of ~/.rssreader, gets each feed and emits the new
+   items to nbox
+* rskshrc
+   basic configuration for all compontnets
+* .rssreader
+   list of rss feeds to process
+* setup
+   script to setup all files, directories and pipes for basic functioning.
