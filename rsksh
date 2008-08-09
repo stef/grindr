@@ -71,9 +71,9 @@ cat ~/.rssreader | while read feed ; do
             done
 
             if [[ -z "$output" ]]; then 
-               output="${icon}$title\n${icon}$author: $title"
+               output="RSS ${icon}$title\nRSS${icon}$author: $title"
             else
-               output="${output}\n${icon}$author: $title"
+               output="${output}\nRSS ${icon}$author: $title"
             fi
             echo "$author: $title%%${newitem}/following-sibling::item[1]" >>$ITEMCACHE
 
