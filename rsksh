@@ -28,11 +28,10 @@
 feedcnt=0
 itemcnt=0
 tmpfile=$(mktemp)
-cat ~/.rssreader | while read feed ; do
+cat ${RSSLIST} | while read feed ; do
    feedcnt=$((feedcnt +1))
-   cachefile=/tmp/rssreader-cache-$feedcnt
-   [[ ! -f "$cachefile" ]] && 
-   
+   cachefile=${RSSCACHE}/$(printf "${feed}" | md5sum | awk '{print $1}')
+
    # get feed
    curl --retry 3 --silent $feed | 
       sed '/^$/d' >$tmpfile
@@ -84,4 +83,4 @@ done
 
 output="^tw()^fg(red)[${itemcnt}]^fg() ${output}"
 print "$output" >$DZENFEED
-
+rm $tmpfile

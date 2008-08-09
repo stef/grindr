@@ -1,0 +1,24 @@
+# common stuff
+BASE="$HOME/.config/korngator"
+# automagic create if not existing
+   [[ ! -d "$RSSCACHE" ]] && mkdir -p "$RSSCACHE"
+DZENFEED="$BASE/notifications"
+# behold, automagic again ...
+   [[ ! -p "$DZENFEED" ]] && mkfifo "$DZENFEED"
+ITEMCACHE=$BASE/rsscache
+
+# nbox stuff 
+FONT="-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*"
+RESOLUTIONX=1024
+RESOLUTIONY=768
+X=$((RESOLUTIONX / 2))
+Y=$((RESOLUTIONY - 15))
+WIDTH=$((RESOLUTIONX / 2))
+LINES=6
+
+# rsksh stuff
+RSSLIST="$BASE/rsslist"
+   [[ ! -r "RSSLIST" ]] && echo "http://yompb.wordpress.com/feed/" >"$RSSLIST"
+RSSCACHE="$BASE/rsscache"
+# let's do some more automagic
+   [[ ! -d "$RSSCACHE" ]] && mkdir -p "$RSSCACHE"

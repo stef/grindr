@@ -1,8 +1,3 @@
 #!/bin/ksh
 
-INSTALLDIR=~/.dzen
-
-[[ ! -d $INSTALLDIR ]] && mkdir -p $INSTALLDIR
-[[ ! -p $INSTALLDIR/.notifications ]] && mkfifo $INSTALLDIR/.notifications
-[[ ! -r ~/.rskshrc ]] && cp rskshrc ~/.rskshrc
-[[ ! -r ~/.rssreader ]] && cp .rssreader ~/.rssreader
+[[ ! -r ~/.korngatorrc ]] && cp korngatorrc ~/.korngatorrc
