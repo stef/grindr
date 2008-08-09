@@ -1,7 +1,7 @@
 # common stuff
 BASE="$HOME/.config/korngator"
 # automagic create if not existing
-   [[ ! -d "$RSSCACHE" ]] && mkdir -p "$RSSCACHE"
+   [[ ! -d "$BASE" ]] && mkdir -p "$BASE"
 DZENFEED="$BASE/notifications"
 # behold, automagic again ...
    [[ ! -p "$DZENFEED" ]] && mkfifo "$DZENFEED"
