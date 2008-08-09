@@ -18,10 +18,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###########
-# you'll need these to use rsksh:
-# apt-get install curl xmlstarlet dzen2 imagemagick
-
-. $HOME/.rskshrc
+# you'll need these to use nbox:
+# apt-get install dzen2 
 
 FONT="-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*"
 RESOLUTIONX=1024
@@ -31,6 +29,8 @@ LINES=6
 X=$((RESOLUTIONX / 2))
 Y=$((RESOLUTIONY - 15))
 WIDTH=$((RESOLUTIONX / 2))
+
+. $HOME/.rskshrc
 
 tail -f $DZENFEED | SHELL=/bin/ksh dzen2 -m -l $LINES -x $X -y $Y -w $WIDTH -p -ta l -sa l -fn $FONT -e "entertitle=uncollapse,grabkeys,scrollhome;enterslave=grabkeys;leaveslave=collapse,ungrabkeys;button1=menuprint;button2=exit:13;button4=scrollup;button5=scrolldown;key_Escape=ungrabkeys,exit" | 
    while read command; do
