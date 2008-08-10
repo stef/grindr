@@ -39,7 +39,5 @@ files
    items to nbox
 * rskshrc
    basic configuration for all compontnets
-* .rssreader
-   list of rss feeds to process
 * setup
    script to setup all files, directories and pipes for basic functioning.
