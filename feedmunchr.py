@@ -59,11 +59,7 @@ class DzenOutput:
       if(len(self.__dict__['lines'])):
          self.__dict__['lines'].reverse()
          # write dzen title bar
-         print "^tw()^fg(red)["+str(len(self.__dict__['lines']))+"]^fg() "+self.__dict__['lines'][-1].encode('utf8')
-         dzen.write("^tw()^fg(red)["+str(len(self.__dict__['lines']))+"]^fg() "+self.__dict__['lines'][-1].encode('utf8'))
-         # write entries
-         print '\n'.join(self.__dict__['lines']).encode('utf8')
-         dzen.write('\n'.join(self.__dict__['lines']).encode('utf8'))
+         dzen.write("^tw()^fg(red)["+str(len(self.__dict__['lines']))+"]^fg() "+self.__dict__['lines'][-1].encode('utf8')+'\n'+'\n'.join(self.__dict__['lines']).encode('utf8'))
       else:
          dzen.write("^tw()\n")
       dzen.close()
@@ -140,7 +136,7 @@ class Storage:
 
 storage=Storage()
 output=DzenOutput()
-f=open(FEELIST, 'r')
+f=open(FEEDLIST, 'r')
 for url in f:
    # get next feed
    feed=feedparser.parse(url)
