@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 #
 # Sample events script for mcabber
 # Plays a sound when receiving a message
@@ -23,9 +23,7 @@ filename=$4
 # Note that the 4th argument is only provided for incoming messages
 # and when 'event_log_files' is set.
 
-dt=`date "+%H:%M:%S"`
-
-[[ $event == "MSG" ]] && [[ $arg = "IN" ]] && {
+[[ $event == "MSG" ]] && [[ $arg1 = "IN" ]] && {
    $CMD_MSG_IN > /dev/null 2>&1
    [[ -n "$filename" ]]  && [[ -f "$filename" ]] && {
      # We could process filename here...
