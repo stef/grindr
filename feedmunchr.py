@@ -15,8 +15,8 @@ try:
 except ImportError: # quick semi-nasty fallback for non-windows/win32com case
    homedir = os.path.expanduser("~")
 
-STORAGE="/home/stef/.config/korngator/rsscache/"
-DZENPIPE="/home/stef/.config/korngator/notifications"
+STORAGE="/home/stef/.config/munchr/rsscache/"
+DZENPIPE="/home/stef/.config/munchr/notifications"
 FEEDLIST=homedir+'/.feedmunchr'
 
 def hash(data):

@@ -1,5 +1,5 @@
 # common stuff
-BASE="$HOME/.config/korngator"
+BASE="$HOME/.config/munchr"
 # automagic create if not existing
    [[ ! -d "$BASE" ]] && mkdir -p "$BASE"
 DZENFEED="$BASE/notifications"

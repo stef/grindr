@@ -1,5 +1,5 @@
-korngator
-========
+munchr
+======
    scripts for feeding dzen with im and rss items.
 
 dependencies
@@ -9,7 +9,7 @@ dependencies
 usage in five easy steps
 ------------------------
     * take care of the dependencies above!
-    * use ./setup or copy manually: cp korngatorrc ~/.korngatorrc
+    * use ./setup or copy manually: cp munchrrc ~/.munchrrc
     * run nbox, so it can poll the pipe.
     * mcabber should be configured to the comments below, im messages should
       appear in the nbox accompanied by a sound.

@@ -27,7 +27,7 @@ filename=$4
    $CMD_MSG_IN > /dev/null 2>&1
    [[ -n "$filename" ]]  && [[ -f "$filename" ]] && {
      # We could process filename here...
-     . $HOME/.korngatorrc
+     . $HOME/.munchrrc
      (printf "^tw()^fg(red)${arg2}:^fg()"; cat $filename) >$DZENFEED
      /bin/rm $filename
   }
