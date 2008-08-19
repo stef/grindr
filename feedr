@@ -1,0 +1,25 @@
+#!env python
+
+import urllib
+
+url="http://www.liberit.hu/tiki/tiki-view_tracker.php?trackerId=3"
+loginurl="https://www.liberit.hu/tiki/tiki-login.php"
+user="stef"
+password="password"
+fields={'Title': 'ins_r33', 'Details': 'ins_34', 'Link': 'ins_35'}
+
+# doing the logistics
+opener = urllib.FancyURLopener()
+
+# try to login
+params = urllib.urlencode({'user': user, 'pass': password})
+f = opener.open(loginurl, params)
+print f.info()
+
+# try to post an item
+params = urllib.urlencode({fields['Title']: 'very first try',
+                           fields['Details']: 'description',
+                           fields['Link']: 'http://localhost/'})
+f = opener.open(url, params)
+print f.info()
+print f.read()
