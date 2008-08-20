@@ -1,25 +1,122 @@
 #!env python
+import os.path
+import urllib2, urllib, tidy
+from Ft.Xml.Domlette import NonvalidatingReader
+from Ft.Xml.XPath.Context import Context
+from Ft.Xml.XPath import Compile, Evaluate
+XHTML_NS = "http://www.w3.org/1999/xhtml"
 
-import urllib
+COOKIEFILE = '/home/stef/.config/munchr/cookies.lwp'
 
-url="http://www.liberit.hu/tiki/tiki-view_tracker.php?trackerId=3"
 loginurl="https://www.liberit.hu/tiki/tiki-login.php"
 user="stef"
 password="password"
+loginparams = urllib.urlencode({'user': user, 'pass': password})
+ERROR_EXPR = Compile('string(//h:div[@class="simplebox error"]/text())')
+#ERROR_EXPR = Compile("string(/h:html/h:head/h:title)")
+
+url="http://www.liberit.hu/tiki/tiki-view_tracker.php?trackerId=3"
 fields={'Title': 'ins_r33', 'Details': 'ins_34', 'Link': 'ins_35'}
-
-# doing the logistics
-opener = urllib.FancyURLopener()
-
-# try to login
-params = urllib.urlencode({'user': user, 'pass': password})
-f = opener.open(loginurl, params)
-print f.info()
-
-# try to post an item
 params = urllib.urlencode({fields['Title']: 'very first try',
                            fields['Details']: 'description',
                            fields['Link']: 'http://localhost/'})
-f = opener.open(url, params)
-print f.info()
-print f.read()
+
+headers =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
+
+class httpfeedr:
+   def getobject(self,url,data,headers):
+      try:
+          req = self.Request(url, data, headers)
+          # create a request object
+
+          handle = self.urlopen(req)
+          # and open it to return a handle on the url
+
+      except IOError, e:
+          print 'We failed to open "%s".' % theurl
+          if hasattr(e, 'code'):
+              print 'We failed with error code - %s.' % e.code
+          elif hasattr(e, 'reason'):
+              print "The error object has the following 'reason' attribute :"
+              print e.reason
+              print "This usually means the server doesn't exist,",
+              print "is down, or we don't have an internet connection."
+          sys.exit()
+
+      else:
+          #print 'Here are the headers of the page :'
+          raw=handle.read()
+          # tidy to xhtml
+          options = dict(output_xhtml=1, add_xml_decl=0, indent=0, tidy_mark=0, doctype="strict", wrap=0)
+          xhtml=str(tidy.parseString(raw, **options))
+          # make it a 4suite document
+          doc = NonvalidatingReader.parseString(xhtml,url)
+          context = Context(doc, processorNss={"h": XHTML_NS})
+          #Compute the XPath against the context
+          error=ERROR_EXPR.evaluate(context)
+          return error
+
+   def __init__(self):
+      self.cj = None
+      ClientCookie = None
+      cookielib = None
+      # Let's see if cookielib is available
+      try:
+          import cookielib
+      except ImportError:
+          # If importing cookielib fails
+          # let's try ClientCookie
+          try:
+              import ClientCookie
+          except ImportError:
+              # ClientCookie isn't available either
+              self.urlopen = urllib2.urlopen
+              self.Request = urllib2.Request
+          else:
+              # imported ClientCookie
+              self.urlopen = ClientCookie.urlopen
+              self.Request = ClientCookie.Request
+              self.cj = ClientCookie.LWPCookieJar()
+
+      else:
+          # importing cookielib worked
+          self.urlopen = urllib2.urlopen
+          self.Request = urllib2.Request
+          self.cj = cookielib.LWPCookieJar()
+          # This is a subclass of FileCookieJar
+          # that has useful load and save methods
+
+      if self.cj is not None:
+      # we successfully imported
+      # one of the two cookie handling modules
+
+          if os.path.isfile(COOKIEFILE):
+              # if we have a cookie file already saved
+              # then load the cookies into the Cookie Jar
+              self.cj.load(COOKIEFILE)
+
+          # Now we need to get our Cookie Jar
+          # installed in the opener;
+          # for fetching URLs
+          if cookielib is not None:
+              # if we use cookielib
+              # then we get the HTTPCookieProcessor
+              # and install the opener in urllib2
+              opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
+              urllib2.install_opener(opener)
+
+          else:
+              # if we use ClientCookie
+              # then we get the HTTPCookieProcessor
+              # and install the opener in ClientCookie
+              opener = ClientCookie.build_opener(ClientCookie.HTTPCookieProcessor(self.cj))
+              ClientCookie.install_opener(opener)
+
+   def close(self):
+      self.cj.save(COOKIEFILE)                     # save the cookies again
+
+# fake a user agent, some websites (like google) don't like automated exploration
+
+feedr=httpfeedr()
+print feedr.getobject(loginurl,loginparams,headers)
+feedr.close()
