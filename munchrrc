@@ -1,10 +1,6 @@
 # common stuff
 BASE="$HOME/.config/munchr"
-# automagic create if not existing
-   [[ ! -d "$BASE" ]] && mkdir -p "$BASE"
 DZENFEED="$BASE/notifications"
-# behold, automagic again ...
-   [[ ! -p "$DZENFEED" ]] && mkfifo "$DZENFEED"
 ITEMCACHE=$BASE/rsscache
 
 # nbox stuff 
@@ -16,9 +12,5 @@ Y=$((RESOLUTIONY - 15))
 WIDTH=$((RESOLUTIONX / 2))
 LINES=6
 
-# rsksh stuff
 RSSLIST="$BASE/rsslist"
-   [[ ! -r "$RSSLIST" ]] && printf "http://yompb.wordpress.com/feed/\nhttp://rss.slashdot.org/Slashdot/slashdot" >"$RSSLIST"
 RSSCACHE="$BASE/rsscache"
-# let's do some more automagic
-   [[ ! -d "$RSSCACHE" ]] && mkdir -p "$RSSCACHE"

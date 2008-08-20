@@ -1,3 +1,14 @@
 #!/bin/ksh
 
 [[ ! -r ~/.munchrrc ]] && cp munchrrc ~/.munchrrc
+
+. ~/.munchrrc || exit 1
+
+# automagic create if not existing
+[[ ! -d "$BASE" ]] && mkdir -p "$BASE"
+# behold, automagic again ...
+[[ ! -p "$DZENFEED" ]] && mkfifo "$DZENFEED"
+# yet more... you guessed it: automagic
+[[ ! -r "$RSSLIST" ]] && printf "http://yompb.wordpress.com/feed/\nhttp://rss.slashdot.org/Slashdot/slashdot" >"$RSSLIST"
+# let's do some more automagic
+[[ ! -d "$RSSCACHE" ]] && mkdir -p "$RSSCACHE"

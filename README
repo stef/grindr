@@ -33,7 +33,7 @@ files
 * feedmunchr.py
    reads the contents of ~/.feedmunchr, gets each feed and emits the new items
    to nbox
-* rskshrc
+* munchrrc
    basic configuration for all compontents
 * setup
    script to setup all files, directories and pipes for basic functioning.
