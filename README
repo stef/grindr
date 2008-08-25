@@ -4,7 +4,7 @@ munchr
 
 dependencies
 ------------
-   apt-get install dzen2 imagemagick python2.5 python-magic python-feedparser
+   apt-get install dzen2 imagemagick python2.5 python-magic python-feedparser python-yaml
 
 usage in five easy steps
 ------------------------
