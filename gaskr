@@ -1,9 +1,14 @@
-#!env python
-import pygtk
+#!/usr/bin/env python
+# vim: set fileencoding=utf8
+
+import pygtk,sys
 pygtk.require('2.0')
 import gtk
 
 COL_TEXT = 0
+
+LABEL="title"
+LABEL2="_description"
 
 class CompletedEntry(gtk.Entry):
     def __init__(self):
@@ -29,15 +34,45 @@ class CompletedEntry(gtk.Entry):
         for word in words:
             model.append([word])
 
+    def enter_callback(self, widget, entry):
+       print entry.get_text()
+       sys.exit(0)
+
 if __name__ == "__main__":
-    win = gtk.Window()
-    win.connect('delete-event', gtk.main_quit)
+   #win=gtk.Window(gtk.WINDOW_TOPLEVEL)
+   win=gtk.Dialog("gaskr",flags=gtk.DIALOG_NO_SEPARATOR)
+   win.set_size_request(400, 45)
+   win.set_title("gaskr")
+   win.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+   win.action_area.set_homogeneous(False)
+   win.connect('delete-event', gtk.main_quit)
 
-    entry = CompletedEntry()
-    entry.add_words(['abc', 'def', 'ghi', 'jkl', 'mno',
-                     'pqr', 'stu', 'vwx', 'yz'])
-    win.add(entry)
-    win.show_all()
+   hbox1=gtk.HBox()
+   win.vbox.pack_start(hbox1,False,False,0)
+   hbox2=gtk.HBox()
+   win.vbox.pack_start(hbox2,False,False,0)
 
-    gtk.main()
+   label = gtk.Label(LABEL)
+   label.set_alignment(xalign=1, yalign=0.5) 
+   hbox1.pack_start(label, False, False, 0)
 
+   entry = CompletedEntry()
+   entry.add_words([u'ötlet',u'mérföldkő',u'sprint',u'beruházás',u'fejlesztés',u'szervezés',u'javítás',u'egyéb feladat'])
+   entry.connect("activate", entry.enter_callback, entry)
+   entry.set_size_request(349,20)
+   hbox1.pack_start(entry, True, True, 0)
+
+   button = gtk.Button()
+   label = gtk.Label()
+   label.set_text_with_mnemonic(LABEL2)
+   label.set_alignment(xalign=1, yalign=0.5) 
+   hbox2.pack_start(label, False, False, 0)
+
+   #entry = CompletedEntry()
+   #entry.add_words([u'ötlet',u'mérföldkő',u'sprint',u'beruházás',u'fejlesztés',u'szervezés',u'javítás',u'egyéb feladat'])
+   #entry.connect("activate", entry.enter_callback, entry)
+   #entry.set_size_request(349,20)
+   #hbox2.pack_start(entry, True, True, 0)
+
+   win.show_all()
+   gtk.main()

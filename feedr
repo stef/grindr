@@ -1,4 +1,4 @@
-#!env python
+#!/usr/bin/env python
 import os.path
 import tidy, sys, pycurl, cStringIO
 from Ft.Xml.Domlette import NonvalidatingReader
@@ -25,6 +25,7 @@ testitem = [('trackerId', '3'),
             (fields['Link'], 'http://localhost/')]
 
 def run(action,params):
+   print >> sys.stderr, 'sending action'   
    c = pycurl.Curl()
    b = cStringIO.StringIO()
    c.setopt(pycurl.URL, action)
@@ -41,13 +42,16 @@ def run(action,params):
    raw=b.getvalue()
 
    # tidy to xhtml
+   print >> sys.stderr, 'cleaning response'   
    options = dict(output_xhtml=1, add_xml_decl=0, indent=0, tidy_mark=0, doctype="strict", wrap=0)
    xhtml=str(tidy.parseString(raw, **options))
    # make it a 4suite document
+   print >> sys.stderr, 'checking errors'   
    doc = NonvalidatingReader.parseString(xhtml,action)
    context = Context(doc, processorNss={"h": XHTML_NS})
    #Compute the XPath against the context
    error=ERROR_EXPR.evaluate(context)
+   print >> sys.stderr, 'done', action
    return (error, xhtml)
 
 print run(login,loginparams)[0]

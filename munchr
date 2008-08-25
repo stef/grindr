@@ -24,7 +24,10 @@ def hash(data):
 
 def getfeedimage(url):
    # get feed icon
-   f=urllib2.urlopen(url)
+   try:
+      f=urllib2.urlopen(url)
+   except:
+      return
    image=f.read()
    f.close()
 

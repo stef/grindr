@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+def message_dispatcher(account, sender, message, conversation, flags):
+    print sender, "said:", message
+
+import dbus, gobject
+from dbus.mainloop.glib import DBusGMainLoop
+dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+bus = dbus.SessionBus()
+
+bus.add_signal_receiver(message_dispatcher,
+                        dbus_interface="im.pidgin.purple.PurpleInterface",
+                        signal_name="ReceivedImMsg")
+
+loop = gobject.MainLoop()
+loop.run()
