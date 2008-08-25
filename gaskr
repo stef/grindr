@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: set fileencoding=utf8
 
-import pygtk,sys
+import pygtk,sys,yaml
 pygtk.require('2.0')
 import gtk
 
@@ -44,7 +44,10 @@ class GUI:
       self.inputs=[]
 
    def enter_callback(self, widget, entry):
-      print entry.get_text()
+      inputs={}
+      for widget in self.inputs:
+         inputs[widget['name']]=widget['entry'].get_text()
+      print yaml.dump(inputs)
       sys.exit(0)
 
    def addinput(self,name,desc=None,type='text',label=None):
