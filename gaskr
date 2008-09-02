@@ -85,9 +85,30 @@ class GUI:
       self.win.show_all()
       gtk.main()
 
+   def load(self,stream):
+      fields=yaml.load(stream)
+      for field in fields:
+         if not field.has_key('name'):
+            continue
+         name=field['name']
+         desc=None
+         if field.has_key('desc'):
+            desc=field['desc']
+         type='text'
+         if field.has_key('type'):
+            type=field['type']
+         label=None
+         if field.has_key('label'):
+            type=field['label']
+         self.addinput(name,desc,type,label)
+
 if __name__ == "__main__":
    gui=GUI()
-   gui.addinput("Title")
-   gui.addinput("Description")
+   stdin = sys.stdin.read()
+   if(len(stdin)<5):
+      print "running default: [{name: Title},{name: Description}]"
+      gui.load("""[{name: Title},{name: Description}]""")
+   else:
+      gui.load(stdin)
    gui.construct()
    gui.run()
