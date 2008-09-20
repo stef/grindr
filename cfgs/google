@@ -1,0 +1,11 @@
+{
+   action: /search,
+   name: f,
+   id: f,
+   fields: [ 
+      { type: hidden, name: hl, value: en, },
+      { type: text, title: Google Search, name: q, },
+      { type: submit, name: btnG, value: Google Search, },
+      { type: submit, name: btnI, value: I'm Feeling Lucky, }, ],
+},
+   

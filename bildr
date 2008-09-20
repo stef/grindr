@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import os.path
-import tidy, sys, pycurl, cStringIO
+import tidy, sys, pycurl, cStringIO, yaml, getopt, os
 from Ft.Xml.Domlette import NonvalidatingReader
 from Ft.Xml.XPath.Context import Context
 from Ft.Xml.XPath import Compile, Evaluate
@@ -12,54 +11,27 @@ HEADERS = ['User-agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)', 'Accept
 COOKIEFILE = '/home/stef/.config/munchr/cookies.lwp'
 FORMTEMPLATE = '/home/stef/tasks/other/munchr/formscan.xsl'
 
-ERROR_EXPR = Compile('string(//h:div[@class="simplebox error"]/text())')
-
-login="https://www.liberit.hu/tiki/tiki-login.php"
-user="stef"
-password="password"
-loginparams = [('user', user), ('pass', password)]
-
 #testitem="http://www.liberit.hu/tiki/tiki-view_tracker.php"
 #testitem="file:///home/stef/tasks/other/munchr/form.html"
-testitem="http://www.google.com/"
+#testitem="http://www.google.com/intl/en/"
 
-def run(action,params):
-   print >> sys.stderr, 'sending action'   
-   c = pycurl.Curl()
-   b = cStringIO.StringIO()
-   c.setopt(pycurl.URL, action)
-   c.setopt(pycurl.HTTPHEADER, HEADERS)
-   c.setopt(pycurl.WRITEFUNCTION, b.write)
-   c.setopt(pycurl.HTTPPOST, params)
-   c.setopt(pycurl.FOLLOWLOCATION, 1)
-   c.setopt(pycurl.SSL_VERIFYPEER, 0)
-   c.setopt(pycurl.MAXREDIRS, 5)
-   c.setopt(pycurl.COOKIEFILE, COOKIEFILE)
-   c.setopt(pycurl.COOKIEJAR, COOKIEFILE)
-   c.perform()
-   c.close
-   raw=b.getvalue()
-
+def normalize(raw):
    # tidy to xhtml
    print >> sys.stderr, 'cleaning response'   
    options = dict(output_xhtml=1, add_xml_decl=0, indent=0, tidy_mark=0, doctype="strict", wrap=0)
-   xhtml=str(tidy.parseString(raw, **options))
-   # make it a 4suite document
-   print >> sys.stderr, 'checking errors'   
-   doc = NonvalidatingReader.parseString(xhtml,action)
-   context = Context(doc, processorNss={"h": XHTML_NS})
-   #Compute the XPath against the context
-   error=ERROR_EXPR.evaluate(context)
-   print >> sys.stderr, 'done', action
-   return (error, xhtml)
+   return str(tidy.parseString(raw, **options))
 
-def scan(url):
+def fetch(params):
    print >> sys.stderr, 'setting up http connection to', url
    c = pycurl.Curl()
    b = cStringIO.StringIO()
-   c.setopt(pycurl.URL, url)
+   c.setopt(pycurl.URL, params['action'])
    c.setopt(pycurl.HTTPHEADER, HEADERS)
    c.setopt(pycurl.WRITEFUNCTION, b.write)
+   if(params.has_key('postfields') and params['postfields'].len()>0):
+      params=[]
+      for field in params['postfields'].items(): postparams.append(field)
+      c.setopt(pycurl.HTTPPOST, postparams)
    c.setopt(pycurl.FOLLOWLOCATION, 1)
    c.setopt(pycurl.SSL_VERIFYPEER, 0)
    c.setopt(pycurl.MAXREDIRS, 5)
@@ -67,20 +39,65 @@ def scan(url):
    c.setopt(pycurl.COOKIEJAR, COOKIEFILE)
    c.perform()
    c.close
-   raw=b.getvalue()
+   res=b.getvalue()
+   b.close
+   return normalize(res)
 
-   # tidy to xhtml
-   print >> sys.stderr, 'cleaning response'   
-   options = dict(output_xhtml=1, add_xml_decl=0, indent=0, tidy_mark=0, doctype="strict", wrap=0)
-   xhtml=str(tidy.parseString(raw, **options))
+def login(params):
+   error=None
+   xhtml=fetch(params)
+   if(params['errorpath']):
+      # make it a 4suite document
+      print >> sys.stderr, 'checking errors'   
+      doc = NonvalidatingReader.parseString(xhtml,params['action'])
+      context = Context(doc, processorNss={"h": XHTML_NS})
+      #Compute the XPath against the context
+      error=Compile(params['errorpath']).evaluate(context)
+   print >> sys.stderr, 'done', params['action']
+   return error
 
+def scan(xhtml,url):
    print >> sys.stderr, 'scanning forms'
    xsltproc = Processor()
    xsltproc.appendStylesheet(DefaultFactory.fromUri(FORMTEMPLATE))
-   forms = xsltproc.run(DefaultFactory.fromString(xhtml,url))
-
+   forms = xsltproc.run(DefaultFactory.fromString(xhtml,url),topLevelParams={u'url': url})
    print >> sys.stderr, 'done'
    return forms
 
-#print run(login,loginparams)[0]
-print scan(testitem)
+def usage():
+   print "bildr v0.2"
+   print "usage: bildr <-l login.cfg> urls"
+   print ""
+   print "Options"
+   print "-h, --help\t\t\tdisplay help"
+   print "-l <file>, --logincfg=<file>\tlogin to urls using the specified login config"
+   print "urls \tscan these urls for forms"
+
+if(__name__=="__main__"):
+   # handling of options
+   try:
+      opts, args = getopt.getopt(sys.argv[1:], "hl:", ["help","logincfg="])
+   except getopt.GetoptError:
+      usage()
+      sys.exit(2)
+   for o, a in opts:
+      if o in ("-h","--help"):
+         usage()
+         sys.exit()
+      if o in ("-l", "--logincfg"):
+         try:
+            loginparams = yaml.load(file(a, 'r'))
+         except yaml.YAMLError, exc:
+            print "Error in configuration file:", exc
+         login(loginparams)
+   if(len(args)>0):
+      # process each url specified 
+      for url in args:
+         sys.stderr.write("processing "+url+'\n')
+         sys.stderr.flush()
+         print scan(fetch({'action': url}),url)
+   else:
+      # we need to process stdin
+      sys.stderr.write("processing stdin\n")
+      sys.stderr.flush()
+      print scan(normalize(sys.stdin.read()),'stdin://')

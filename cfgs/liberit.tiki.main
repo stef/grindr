@@ -1,0 +1,16 @@
+
+{
+   action: tiki-searchresults.php,
+   fields: [ 
+      { type: text, name: highlight, id: fuser }, 
+      { type: select, name: where, options: { 'Entire Site', 'Wiki Pages', 'Files', 'Blogs', 'Blog Posts',  } },
+      { type: submit, name: search, value: Go, }, ],
+},
+   
+{
+   action: tiki-editpage.php,
+   fields: [ 
+      { type: text, name: page, },
+      { type: submit, name: quickedit, value: Create/Edit, }, ],
+},
+   

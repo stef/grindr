@@ -1,0 +1,8 @@
+{
+action: https://www.liberit.hu/tiki/tiki-login.php,
+errorpath: string(//h:div[@class="simplebox error"]/text())
+postfields: {
+user: stef,
+password: password 
+}
+}
