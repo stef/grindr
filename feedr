@@ -4,6 +4,8 @@ import tidy, sys, pycurl, cStringIO
 from Ft.Xml.Domlette import NonvalidatingReader
 from Ft.Xml.XPath.Context import Context
 from Ft.Xml.XPath import Compile, Evaluate
+from secret import password
+
 XHTML_NS = "http://www.w3.org/1999/xhtml"
 
 HEADERS = ['User-agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)']
@@ -11,7 +13,6 @@ COOKIEFILE = '/home/stef/.config/munchr/cookies.lwp'
 
 login="https://www.liberit.hu/tiki/tiki-login.php"
 user="stef"
-password="password"
 loginparams = [('user', user), ('pass', password)]
 ERROR_EXPR = Compile('string(//h:div[@class="simplebox error"]/text())')
 
