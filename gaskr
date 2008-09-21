@@ -10,6 +10,21 @@ GUITABBEDHEIGHT=58
 GUIWIDTH=400
 COL_TEXT = 0
 
+def errhandler(param):
+   print "unrecognized param:", param
+   return None
+
+def ignore(param):
+   print "ignoring param:", param
+   return None 
+
+def get_active_text(combobox):
+   model = combobox.get_model()
+   active = combobox.get_active()
+   if active < 0:
+      return None
+   return model[active][0]
+
 class CompletedEntry(gtk.Entry):
     def __init__(self):
         gtk.Entry.__init__(self)
@@ -42,73 +57,101 @@ class GUI:
       self.win.action_area.set_homogeneous(False)
       self.win.connect('delete-event', gtk.main_quit)
       self.inputs=[]
+      self.buttons=[]
+      self.hidden=[]
+      self.fieldhandlers = {
+            'text': self.addText,
+            'select': self.addSelect, 
+            'submit': self.addButton, 
+            'hidden': self.addHidden, 
+            }
 
-   def enter_callback(self, widget, entry):
+   def enter_callback(self, widget=None, data=None):
       inputs={}
+      if(data):
+         inputs[data['name']]=1
       for widget in self.inputs:
-         inputs[widget['name']]=widget['entry'].get_text()
+         if(widget['type']=='text'):
+            inputs[widget['name']]=widget['entry'].get_text()
+         elif(widget['type']=='select'):
+            inputs[widget['name']]=get_active_text(widget['entry'])
+      for field in self.hidden:
+         inputs[field['name']]=field['value']
       print yaml.dump(inputs)
       sys.exit(0)
 
-   def addinput(self,name,desc=None,type='text',label=None):
-      widget={'name': name}
+   def addText(self,field):
+      widget={'name': field['name'], 'type': 'text'}
       widget['entry'] = CompletedEntry()
       widget['entry'].add_words([u'ötlet',u'mérföldkő',u'sprint',u'beruházás',u'fejlesztés',u'szervezés',u'javítás',u'egyéb feladat'])
-      widget['entry'].connect("activate", self.enter_callback, widget['entry'])
+      widget['entry'].connect("activate", self.enter_callback)
 
       widget['label'] = gtk.Label()
-      if not label:
-         label='_'+name
+      label='_'+field['name']
       widget['label'].set_text_with_mnemonic(label)
       widget['label'].set_alignment(xalign=1, yalign=0.5) 
       self.inputs.append(widget)
 
+   def addSelect(self,field):
+      widget={'name': field['name'], 'type': 'select'}
+      widget['entry'] = gtk.combo_box_new_text()
+      for opt in field['options']:
+         widget['entry'].append_text(opt)
+
+      widget['label'] = gtk.Label()
+      label='_'+field['name']
+      widget['label'].set_text_with_mnemonic(label)
+      widget['label'].set_alignment(xalign=1, yalign=0.5) 
+      self.inputs.append(widget)
+
+   def addButton(self,field):
+      widget={'name': field['name'], 'type': 'submit'}
+      widget['entry']=gtk.Button(field['name'])
+      widget['entry'].connect("clicked", self.enter_callback, widget)
+      self.buttons.append(widget)
+
+   def addHidden(self,field):
+      widget={'name': field['name'], 'type': 'hidden', 'value': field['value']}
+      self.hidden.append(widget)
+
+   def addinput(self,field):
+      self.fieldhandlers.get(field['type'],errhandler)(field)
+
    def construct(self):
       inputlen=len(self.inputs)
+      self.win.set_size_request(GUIWIDTH,-1)
       if(inputlen==1):
          hbox=gtk.HBox()
          hbox.pack_start(self.inputs[0]['label'], False, False, 0)
          self.inputs[0]['entry'].set_size_request(400,20)
          hbox.pack_start(self.inputs[0]['entry'], True, True, 0)
          self.win.vbox.pack_start(hbox,False,False,0)
-         self.win.set_size_request(GUIWIDTH, GUISINGLEHEIGHT)
-         return
       if(inputlen>1):
          nbook=gtk.Notebook()
          nbook.set_tab_pos(gtk.POS_BOTTOM)
          for widget in self.inputs:
             nbook.append_page(widget['entry'],widget['label'])
          self.win.vbox.pack_start(nbook,False,False,0)
-         self.win.set_size_request(GUIWIDTH, GUITABBEDHEIGHT)
+      if(len(self.buttons)>1):
+         hbox=gtk.HBox()
+         for button in self.buttons:
+            hbox.pack_start(button['entry'],True,True,0)
+         self.win.vbox.pack_start(hbox,False,False,0)
 
    def run(self):
       self.win.show_all()
       gtk.main()
 
    def load(self,stream):
-      fields=yaml.load(stream)
-      for field in fields:
-         if not field.has_key('name'):
-            continue
-         name=field['name']
-         desc=None
-         if field.has_key('desc'):
-            desc=field['desc']
-         type='text'
-         if field.has_key('type'):
-            type=field['type']
-         label=None
-         if field.has_key('label'):
-            type=field['label']
-         self.addinput(name,desc,type,label)
+      form=yaml.load(stream)
+      if not form.has_key('action'):
+         return
+      for field in form['fields']:
+         self.addinput(field)
 
 if __name__ == "__main__":
    gui=GUI()
    stdin = sys.stdin.read()
-   if(len(stdin)<5):
-      print "running default: [{name: Title},{name: Description}]"
-      gui.load("""[{name: Title},{name: Description}]""")
-   else:
-      gui.load(stdin)
+   gui.load(stdin)
    gui.construct()
    gui.run()
