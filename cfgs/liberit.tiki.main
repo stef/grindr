@@ -3,7 +3,7 @@
    action: tiki-searchresults.php,
    fields: [ 
       { type: text, name: highlight, id: fuser }, 
-      { type: select, name: where, options: { 'Entire Site', 'Wiki Pages', 'Files', 'Blogs', 'Blog Posts',  } },
+      { type: select, name: where, options: [ Entire Site, Wiki Pages, Files, Blogs, Blog Posts,  ] },
       { type: submit, name: search, value: Go, }, ],
 },
    
