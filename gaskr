@@ -64,11 +64,17 @@ class GUI:
             'select': self.addSelect, 
             'submit': self.addButton, 
             'hidden': self.addHidden, 
+            # TODO add support for checkboxes, etc
             }
 
    def enter_callback(self, widget=None, data=None):
       inputs={}
+      # TODO implement inputs=self.form, so that yaml.dump(self.form) is only
+      # ammended with the appropriate values set.
+      # we want this, so we can send this to our feedr, which dispatches the
+      # request to the web service. 
       if(data):
+         # set param with the name of the submit button pushed
          inputs[data['name']]=1
       for widget in self.inputs:
          if(widget['type']=='text'):
@@ -81,7 +87,7 @@ class GUI:
       sys.exit(0)
 
    def addText(self,field):
-      widget={'name': field['name'], 'type': 'text'}
+      widget={'name': field['name'], 'type': 'text', 'field': field}
       widget['entry'] = CompletedEntry()
       widget['entry'].add_words([u'ötlet',u'mérföldkő',u'sprint',u'beruházás',u'fejlesztés',u'szervezés',u'javítás',u'egyéb feladat'])
       widget['entry'].connect("activate", self.enter_callback)
@@ -93,7 +99,7 @@ class GUI:
       self.inputs.append(widget)
 
    def addSelect(self,field):
-      widget={'name': field['name'], 'type': 'select'}
+      widget={'name': field['name'], 'type': 'select', 'field': field}
       widget['entry'] = gtk.combo_box_new_text()
       for opt in field['options']:
          widget['entry'].append_text(opt)
@@ -105,13 +111,13 @@ class GUI:
       self.inputs.append(widget)
 
    def addButton(self,field):
-      widget={'name': field['name'], 'type': 'submit'}
-      widget['entry']=gtk.Button(field['name'])
+      widget={'name': field['name'], 'type': 'submit', 'field': field}
+      widget['entry']=gtk.Button(field['value'])
       widget['entry'].connect("clicked", self.enter_callback, widget)
       self.buttons.append(widget)
 
    def addHidden(self,field):
-      widget={'name': field['name'], 'type': 'hidden', 'value': field['value']}
+      widget={'name': field['name'], 'type': 'hidden', 'value': field['value'], 'field': field}
       self.hidden.append(widget)
 
    def addinput(self,field):
@@ -127,6 +133,13 @@ class GUI:
          hbox.pack_start(self.inputs[0]['entry'], True, True, 0)
          self.win.vbox.pack_start(hbox,False,False,0)
       if(inputlen>1):
+         # TODO implement mandatory/primary and optional/secondary fields, so
+         # that we have only one vbox with all mandatory fields. and a
+         # label/checkbox which when accessed will add all secondary fields to
+         # the vbox.
+         # alternatively implement fields growing/shrinking in size according
+         # to their importancy. hmmm, maybe they should be also sorted by
+         # importance/relevance/size. hmmm, then we can forget about gtk.
          nbook=gtk.Notebook()
          nbook.set_tab_pos(gtk.POS_BOTTOM)
          for widget in self.inputs:
@@ -143,10 +156,10 @@ class GUI:
       gtk.main()
 
    def load(self,stream):
-      form=yaml.load(stream)
-      if not form.has_key('action'):
+      self.form=yaml.load(stream)
+      if not self.form.has_key('action'):
          return
-      for field in form['fields']:
+      for field in self.form['fields']:
          self.addinput(field)
 
 if __name__ == "__main__":
