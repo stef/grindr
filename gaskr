@@ -73,7 +73,7 @@ class GUI:
       # ammended with the appropriate values set.
       # we want this, so we can send this to our feedr, which dispatches the
       # request to the web service. 
-      if(data):
+      if(data and data.has_key('name')):
          # set param with the name of the submit button pushed
          inputs[data['name']]=1
       for widget in self.inputs:
@@ -111,8 +111,10 @@ class GUI:
       self.inputs.append(widget)
 
    def addButton(self,field):
-      widget={'name': field['name'], 'type': 'submit', 'field': field}
+      widget={'type': 'submit', 'field': field}
       widget['entry']=gtk.Button(field['value'])
+      if(field.has_key('name')):
+            widget['name']=field['name']
       widget['entry'].connect("clicked", self.enter_callback, widget)
       self.buttons.append(widget)
 
