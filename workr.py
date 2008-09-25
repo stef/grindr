@@ -27,6 +27,7 @@ def send(params, debug=None):
    if(params.has_key('postfields') and len(params['postfields'])>0):
       postparams=[]
       for field in params['postfields'].items(): postparams.append(field)
+      print postparams
       c.setopt(pycurl.HTTPPOST, postparams)
    c.setopt(pycurl.FOLLOWLOCATION, 1)
    c.setopt(pycurl.SSL_VERIFYPEER, 0)

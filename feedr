@@ -41,5 +41,6 @@ if(__name__=="__main__"):
          loginparams = yaml.load(sys.stdin.read())
       except yaml.YAMLError, exc:
          print "Error in configuration file:", exc
+         sys.exit(1)
       result,xhtml=fetch(loginparams,debug=DEBUG)
       print result

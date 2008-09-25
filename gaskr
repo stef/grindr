@@ -63,6 +63,7 @@ class GUI:
             'text': self.addText,
             'select': self.addSelect, 
             'submit': self.addButton, 
+            'textarea': self.addTextarea, 
             'hidden': self.addHidden, 
             # TODO add support for checkboxes, etc
             }
@@ -81,9 +82,17 @@ class GUI:
             inputs[widget['name']]=widget['entry'].get_text()
          elif(widget['type']=='select'):
             inputs[widget['name']]=get_active_text(widget['entry'])
+         elif(widget['type']=='textarea'):
+            textbuffer=widget['textbuffer']
+            start,end=textbuffer.get_bounds()
+            inputs[widget['name']]=textbuffer.get_text(start,end)
       for field in self.hidden:
          inputs[field['name']]=field['value']
-      print yaml.dump(inputs)
+
+      res={'postfields': inputs, 'action': self.form['action']}
+      if(self.form.has_key('resultxpath')):
+         res['resultxpath']=self.form['resultxpath']
+      print yaml.dump(res)
       sys.exit(0)
 
    def addText(self,field):
@@ -93,7 +102,29 @@ class GUI:
       widget['entry'].connect("activate", self.enter_callback)
 
       widget['label'] = gtk.Label()
-      label='_'+field['name']
+      if field.has_key('label'): 
+         label=field['label']
+      else:
+         label="_"+field['name']
+      widget['label'].set_text_with_mnemonic(label)
+      widget['label'].set_alignment(xalign=1, yalign=0.5) 
+      self.inputs.append(widget)
+
+   def addTextarea(self,field):
+      widget={'name': field['name'], 'type': 'textarea', 'field': field}
+      sw = gtk.ScrolledWindow()
+      sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+      textview=gtk.TextView()
+      textview.set_editable(True)
+      widget['textbuffer']=textview.get_buffer()
+      sw.add(textview)
+      widget['entry'] = sw
+
+      widget['label'] = gtk.Label()
+      if field.has_key('label'): 
+         label=field['label']
+      else:
+         label="_"+field['name']
       widget['label'].set_text_with_mnemonic(label)
       widget['label'].set_alignment(xalign=1, yalign=0.5) 
       self.inputs.append(widget)
@@ -105,7 +136,10 @@ class GUI:
          widget['entry'].append_text(opt)
 
       widget['label'] = gtk.Label()
-      label='_'+field['name']
+      if field.has_key('label'): 
+         label=field['label']
+      else:
+         label='_'+field['name']
       widget['label'].set_text_with_mnemonic(label)
       widget['label'].set_alignment(xalign=1, yalign=0.5) 
       self.inputs.append(widget)
