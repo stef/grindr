@@ -5,56 +5,9 @@ from Ft.Xml.XPath.Context import Context
 from Ft.Xml.XPath import Compile, Evaluate
 from Ft.Xml.Xslt.Processor import Processor
 from Ft.Xml.InputSource import DefaultFactory
-XHTML_NS = "http://www.w3.org/1999/xhtml"
+from workr import fetch, send, normalize, VERSION
 
-HEADERS = ['User-agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)', 'Accept-Language: en-us,en;q=0.5']
-COOKIEFILE = '/home/stef/.config/munchr/cookies.lwp'
 FORMTEMPLATE = '/home/stef/tasks/other/munchr/formscan.xsl'
-
-#testitem="http://www.liberit.hu/tiki/tiki-view_tracker.php"
-#testitem="file:///home/stef/tasks/other/munchr/form.html"
-#testitem="http://www.google.com/intl/en/"
-
-def normalize(raw):
-   # tidy to xhtml
-   print >> sys.stderr, 'cleaning response'   
-   options = dict(output_xhtml=1, add_xml_decl=0, indent=0, tidy_mark=0, doctype="strict", wrap=0)
-   return str(tidy.parseString(raw, **options))
-
-def fetch(params):
-   print >> sys.stderr, 'setting up http connection to', url
-   c = pycurl.Curl()
-   b = cStringIO.StringIO()
-   c.setopt(pycurl.URL, params['action'])
-   c.setopt(pycurl.HTTPHEADER, HEADERS)
-   c.setopt(pycurl.WRITEFUNCTION, b.write)
-   if(params.has_key('postfields') and params['postfields'].len()>0):
-      params=[]
-      for field in params['postfields'].items(): postparams.append(field)
-      c.setopt(pycurl.HTTPPOST, postparams)
-   c.setopt(pycurl.FOLLOWLOCATION, 1)
-   c.setopt(pycurl.SSL_VERIFYPEER, 0)
-   c.setopt(pycurl.MAXREDIRS, 5)
-   c.setopt(pycurl.COOKIEFILE, COOKIEFILE)
-   c.setopt(pycurl.COOKIEJAR, COOKIEFILE)
-   c.perform()
-   c.close
-   res=b.getvalue()
-   b.close
-   return normalize(res)
-
-def login(params):
-   error=None
-   xhtml=fetch(params)
-   if(params['errorpath']):
-      # make it a 4suite document
-      print >> sys.stderr, 'checking errors'   
-      doc = NonvalidatingReader.parseString(xhtml,params['action'])
-      context = Context(doc, processorNss={"h": XHTML_NS})
-      #Compute the XPath against the context
-      error=Compile(params['errorpath']).evaluate(context)
-   print >> sys.stderr, 'done', params['action']
-   return error
 
 def scan(xhtml,url):
    print >> sys.stderr, 'scanning forms'
@@ -65,7 +18,7 @@ def scan(xhtml,url):
    return forms
 
 def usage():
-   print "bildr v0.2"
+   print "bildr", VERSION
    print "usage: bildr <-l login.cfg> urls"
    print ""
    print "Options"
@@ -89,13 +42,14 @@ if(__name__=="__main__"):
             loginparams = yaml.load(file(a, 'r'))
          except yaml.YAMLError, exc:
             print "Error in configuration file:", exc
-         login(loginparams)
+         result,xhtml=fetch(loginparams)
+         print result
    if(len(args)>0):
       # process each url specified 
       for url in args:
          sys.stderr.write("processing "+url+'\n')
          sys.stderr.flush()
-         print scan(fetch({'action': url}),url)
+         print scan(send({'action': url}),url)
    else:
       # we need to process stdin
       sys.stderr.write("processing stdin\n")

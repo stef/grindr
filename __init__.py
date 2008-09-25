@@ -4,4 +4,4 @@
 # (C) 2005 by Marsiske Stefan, <stef@sysdata.siemens.hu>
 # $Id:$
 
-__all__ = ["secret"]
+__all__ = ["workr"]

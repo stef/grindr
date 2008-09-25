@@ -1,59 +1,45 @@
 #!/usr/bin/env python
-import os.path
-import tidy, sys, pycurl, cStringIO
-from Ft.Xml.Domlette import NonvalidatingReader
-from Ft.Xml.XPath.Context import Context
-from Ft.Xml.XPath import Compile, Evaluate
-from secret import password
+import getopt, sys, yaml
+from workr import fetch, VERSION
 
-XHTML_NS = "http://www.w3.org/1999/xhtml"
+DEBUG=None
 
-HEADERS = ['User-agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)']
-COOKIEFILE = '/home/stef/.config/munchr/cookies.lwp'
+def usage():
+   print "feedr", VERSION
+   print "usage: feedr [<actionfiles>]"
+   print ""
+   print "either supply actions via stdin or in actionfiles"
 
-login="https://www.liberit.hu/tiki/tiki-login.php"
-user="stef"
-loginparams = [('user', user), ('pass', password)]
-ERROR_EXPR = Compile('string(//h:div[@class="simplebox error"]/text())')
-
-addtestitem="http://www.liberit.hu/tiki/tiki-view_tracker.php"
-fields={'User': 'ins_32', 'Title': 'ins_33', 'Details': 'ins_34', 'Link': 'ins_35'}
-testitem = [('trackerId', '3'),
-            ('save', 'Save'),
-            (fields['Title'], 'very first try'),
-            (fields['User'], user),
-            (fields['Details'], 'description'),
-            (fields['Link'], 'http://localhost/')]
-
-def run(action,params):
-   print >> sys.stderr, 'sending action'   
-   c = pycurl.Curl()
-   b = cStringIO.StringIO()
-   c.setopt(pycurl.URL, action)
-   c.setopt(pycurl.HTTPHEADER, HEADERS)
-   c.setopt(pycurl.WRITEFUNCTION, b.write)
-   c.setopt(pycurl.HTTPPOST, params)
-   c.setopt(pycurl.FOLLOWLOCATION, 1)
-   c.setopt(pycurl.SSL_VERIFYPEER, 0)
-   c.setopt(pycurl.MAXREDIRS, 5)
-   c.setopt(pycurl.COOKIEFILE, COOKIEFILE)
-   c.setopt(pycurl.COOKIEJAR, COOKIEFILE)
-   c.perform()
-   c.close
-   raw=b.getvalue()
-
-   # tidy to xhtml
-   print >> sys.stderr, 'cleaning response'   
-   options = dict(output_xhtml=1, add_xml_decl=0, indent=0, tidy_mark=0, doctype="strict", wrap=0)
-   xhtml=str(tidy.parseString(raw, **options))
-   # make it a 4suite document
-   print >> sys.stderr, 'checking errors'   
-   doc = NonvalidatingReader.parseString(xhtml,action)
-   context = Context(doc, processorNss={"h": XHTML_NS})
-   #Compute the XPath against the context
-   error=ERROR_EXPR.evaluate(context)
-   print >> sys.stderr, 'done', action
-   return (error, xhtml)
-
-print run(login,loginparams)[0]
-print run(addtestitem,testitem)[0]
+if(__name__=="__main__"):
+   # handling of options
+   try:
+      opts, args = getopt.getopt(sys.argv[1:], "hd", ["help","debug"])
+   except getopt.GetoptError:
+      usage()
+      sys.exit(2)
+   for o, a in opts:
+      if o in ("-h","--help"):
+         usage()
+         sys.exit()
+      if o in ("-d","--debug"):
+         DEBUG=1
+   if(len(args)>0):
+      # process each url specified 
+      for action in args:
+         sys.stderr.write("processing "+action+'\n')
+         try:
+            loginparams = yaml.load(file(action, 'r'))
+         except yaml.YAMLError, exc:
+            print "Error in configuration file:", exc
+            sys.exit(1)
+         result,xhtml=fetch(loginparams,debug=DEBUG)
+         print result
+   else:
+      # we need to process stdin
+      sys.stderr.write("processing stdin\n")
+      try:
+         loginparams = yaml.load(sys.stdin.read())
+      except yaml.YAMLError, exc:
+         print "Error in configuration file:", exc
+      result,xhtml=fetch(loginparams,debug=DEBUG)
+      print result

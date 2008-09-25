@@ -8,7 +8,7 @@
 
    <xsl:template match="h:form" >
 {<xsl:if test="@action!=''">
-<!--   url: <xsl:value-of select="$url" /> -->
+   url: '<xsl:value-of select="$url" />',
    action: <xsl:value-of select="@action" />,</xsl:if>
    <xsl:if test="@name!=''">
    name: <xsl:value-of select="@name" />,</xsl:if>
