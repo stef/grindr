@@ -5,8 +5,6 @@ import pygtk,sys,yaml
 pygtk.require('2.0')
 import gtk
 
-GUISINGLEHEIGHT=28
-GUITABBEDHEIGHT=58
 GUIWIDTH=400
 COL_TEXT = 0
 
@@ -59,14 +57,23 @@ class GUI:
       self.inputs=[]
       self.buttons=[]
       self.hidden=[]
+      self.showmore=None
+      self.primaries=None
+      self.secondaries=None
       self.fieldhandlers = {
             'text': self.addText,
             'select': self.addSelect, 
             'submit': self.addButton, 
             'textarea': self.addTextarea, 
             'hidden': self.addHidden, 
-            # TODO add support for checkboxes, etc
+            # TODO add support for checkboxes, radiobuttons, etc
             }
+
+   def togglemore(self, widget=None, data=None):
+      if self.expander.get_expanded():
+         self.secondaries.show_all()
+      else:
+         self.secondaries.hide_all()
 
    def enter_callback(self, widget=None, data=None):
       inputs={}
@@ -76,7 +83,7 @@ class GUI:
       # request to the web service. 
       if(data and data.has_key('name')):
          # set param with the name of the submit button pushed
-         inputs[data['name']]=1
+         inputs[data['name']]=data['name']
       for widget in self.inputs:
          if(widget['type']=='text'):
             inputs[widget['name']]=widget['entry'].get_text()
@@ -101,13 +108,18 @@ class GUI:
       widget['entry'].add_words([u'ötlet',u'mérföldkő',u'sprint',u'beruházás',u'fejlesztés',u'szervezés',u'javítás',u'egyéb feladat'])
       widget['entry'].connect("activate", self.enter_callback)
 
-      widget['label'] = gtk.Label()
+      label = gtk.Label()
+      #font=label.get_style().font
       if field.has_key('label'): 
-         label=field['label']
+         labeltext=field['label']
+         #width=font.get_width(labeltext)
       else:
-         label="_"+field['name']
-      widget['label'].set_text_with_mnemonic(label)
-      widget['label'].set_alignment(xalign=1, yalign=0.5) 
+         #width=font.get_width(field['name'])
+         labeltext="_"+field['name']
+      label.set_text_with_mnemonic(labeltext)
+      label.set_alignment(xalign=1, yalign=0.5) 
+      #label.set_size_request(width+10,-1)
+      widget['label']=label
       self.inputs.append(widget)
 
    def addTextarea(self,field):
@@ -169,19 +181,27 @@ class GUI:
          hbox.pack_start(self.inputs[0]['entry'], True, True, 0)
          self.win.vbox.pack_start(hbox,False,False,0)
       if(inputlen>1):
-         # TODO implement mandatory/primary and optional/secondary fields, so
-         # that we have only one vbox with all mandatory fields. and a
-         # label/checkbox which when accessed will add all secondary fields to
-         # the vbox.
-         # alternatively implement fields growing/shrinking in size according
-         # to their importancy. hmmm, maybe they should be also sorted by
-         # importance/relevance/size. hmmm, then we can forget about gtk.
-         nbook=gtk.Notebook()
-         nbook.set_tab_pos(gtk.POS_BOTTOM)
+         self.primaries=gtk.VBox()
+         self.secondaries=gtk.VBox()
+
+         morelabel = gtk.CheckButton("_More Fields")
+         self.expander=gtk.expander_new_with_mnemonic("_More Fields")
+         self.expander.connect("notify::expanded", self.togglemore)
+         self.expander.add(self.secondaries)
+         self.secondaries.set_no_show_all(True)
+
          for widget in self.inputs:
-            nbook.append_page(widget['entry'],widget['label'])
-         self.win.vbox.pack_start(nbook,False,False,0)
-      if(len(self.buttons)>1):
+            hbox=gtk.HBox()
+            hbox.pack_start(widget['label'],False,False)
+            hbox.pack_start(widget['entry'])
+            if(widget['field']['primary']):
+               self.primaries.pack_start(hbox,False,False,0)
+            else:
+               self.secondaries.pack_start(hbox,False,False,0)
+         self.win.vbox.pack_start(self.primaries,False,False,0)
+         self.win.vbox.pack_start(self.expander,False,False,0)
+
+      if self.buttons:
          hbox=gtk.HBox()
          for button in self.buttons:
             hbox.pack_start(button['entry'],True,True,0)
@@ -189,6 +209,8 @@ class GUI:
 
    def run(self):
       self.win.show_all()
+      if self.secondaries:
+         self.secondaries.set_no_show_all(False)
       gtk.main()
 
    def load(self,stream):
