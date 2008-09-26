@@ -109,16 +109,12 @@ class GUI:
       widget['entry'].connect("activate", self.enter_callback)
 
       label = gtk.Label()
-      #font=label.get_style().font
       if field.has_key('label'): 
          labeltext=field['label']
-         #width=font.get_width(labeltext)
       else:
-         #width=font.get_width(field['name'])
          labeltext="_"+field['name']
       label.set_text_with_mnemonic(labeltext)
       label.set_alignment(xalign=1, yalign=0.5) 
-      #label.set_size_request(width+10,-1)
       widget['label']=label
       self.inputs.append(widget)
 
