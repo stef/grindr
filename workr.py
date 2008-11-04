@@ -2,7 +2,8 @@
 import tidy, sys, pycurl, cStringIO
 from Ft.Xml.Domlette import NonvalidatingReader
 from Ft.Xml.XPath.Context import Context
-from Ft.Xml.XPath import Compile, Evaluate
+from Ft.Xml.XPath import Compile
+from Ft.Xml.Domlette import PrettyPrint
 from urlparse import urlsplit, urlunsplit
 
 XHTML_NS = "http://www.w3.org/1999/xhtml"
@@ -66,7 +67,16 @@ def fetch(params, debug=None,nopost=None):
    doc = NonvalidatingReader.parseString(xhtml,params['action'])
    context = Context(doc, processorNss={"h": XHTML_NS})
    #Compute the XPath against the context
-   results=Compile(params['resultxpath']).evaluate(context)
+   results=Compile(params['resultxpath'])
+   results=results.evaluate(context)
+   res=[]
+   for a in results:
+      tf = cStringIO.StringIO()
+      PrettyPrint(a,tf)
+      t=tf.getvalue()
+      res.append(t)
+      tf.close()
+   results=res
    if debug: print >> sys.stderr, 'done', params['action']
    return (results, xhtml)
 

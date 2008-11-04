@@ -1,0 +1,19 @@
+#!/bin/sh
+
+check_interval=120
+
+shutdown() {
+   pkill -P $NBOXPID
+   kill $NBOXPID
+   exit
+}
+
+./nbox >&2 &
+
+NBOXPID=$!
+trap shutdown INT TERM
+
+while true; do
+   ./munchr
+   sleep $check_interval
+done

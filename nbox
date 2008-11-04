@@ -30,14 +30,9 @@ X=$((RESOLUTIONX / 2))
 Y=$((RESOLUTIONY - 15))
 WIDTH=$((RESOLUTIONX / 2))
 
-# The following sound comes with the gtkboard package,
-# you can modify this line to play another one...
-CMD_MSG_IN="/usr/bin/aplay /usr/share/sounds/KDE_Notify.wav"
-
 . $HOME/.munchrrc
 
 tail -f $DZENFEED | SHELL=/bin/ksh dzen2 -m -l $LINES -x $X -y $Y -w $WIDTH -p -ta l -sa l -fn $FONT -e "entertitle=uncollapse,grabkeys,scrollend;enterslave=grabkeys;leaveslave=collapse,ungrabkeys;button1=menuprint;button2=exit:13;button4=scrollup;button5=scrolldown;key_Escape=ungrabkeys,exit" | 
    while read command; do
       print $command
-      $CMD_MSG_IN > /dev/null 2>&1
    done

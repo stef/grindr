@@ -9,6 +9,11 @@
 # $3 is the jid
 # $4 is an optional filename (with the message contents)
 
+# The following sound comes with the gtkboard package,
+# you can modify this line to play another one...
+CMD_MSG_IN="/usr/bin/aplay /usr/share/sounds/KDE_Notify.wav"
+
+
 event=$1
 arg1=$2
 arg2=$3
@@ -21,6 +26,7 @@ filename=$4
      # We could process filename here...
      . $HOME/.munchrrc
      (printf "^tw()^fg(red)${arg2}:^fg()"; cat $filename) >$DZENFEED
+     $CMD_MSG_IN > /dev/null 2>&1
      /bin/rm $filename
   }
 }
