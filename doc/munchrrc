@@ -1,0 +1,16 @@
+# common stuff
+BASE="$HOME/.config/munchr"
+DZENFEED="$BASE/notifications"
+ITEMCACHE=$BASE/rsscache
+
+# nbox stuff 
+FONT="-*-courier-medium-r-*-*-12-*-*-*-*-*-*-*"
+RESOLUTIONX=1024
+RESOLUTIONY=768
+X=$((RESOLUTIONX / 2))
+Y=$((RESOLUTIONY - 15))
+WIDTH=$((RESOLUTIONX / 2))
+LINES=6
+
+RSSLIST="$BASE/rsslist"
+RSSCACHE="$BASE/rsscache"

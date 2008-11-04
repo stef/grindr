@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-[[ ! -r ~/.munchrrc ]] && cp munchrrc ~/.munchrrc
+[[ ! -r ~/.munchrrc ]] && cp doc/munchrrc ~/.munchrrc
 
 . ~/.munchrrc || exit 1
 
