@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Stefan Marsiske <stefan.marsiske@gmail.com>, 2008
+# experimental script to support pidgin/purble IM applications in nbox
 
 def message_dispatcher(account, sender, message, conversation, flags):
     print sender, "said:", message

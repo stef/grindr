@@ -15,6 +15,7 @@ try:
 except ImportError: # quick semi-nasty fallback for non-windows/win32com case
    homedir = os.path.expanduser("~")
 
+# TODO config
 STORAGE="/home/stef/.config/munchr/rsscache/"
 DZENPIPE="/home/stef/.config/munchr/notifications"
 FEEDLIST=homedir+'/.feedmunchr'
@@ -135,23 +136,22 @@ class Storage:
       itemstr.seek(0)
       return pickle.load(itemstr)
 
-##### MAIN #####
+if __name__ == "__main__":
+   storage=Storage()
+   output=DzenOutput()
+   f=open(FEEDLIST, 'r')
+   for url in f:
+      # get next feed
+      feed=feedparser.parse(url)
+      # store feed info
+      storage.store((feed.feed.link),feed.feed)
+      # process entries
+      for entry in feed.entries:
+         if (storage.store((feed.feed.link,entry.title),entry)):
+            # do something with this new entry
+            output.push(entry,feed.feed)
 
-storage=Storage()
-output=DzenOutput()
-f=open(FEEDLIST, 'r')
-for url in f:
-   # get next feed
-   feed=feedparser.parse(url)
-   # store feed info
-   storage.store((feed.feed.link),feed.feed)
-   # process entries
-   for entry in feed.entries:
-      if (storage.store((feed.feed.link,entry.title),entry)):
-         # do something with this new entry
-         output.push(entry,feed.feed)
-
-# tidy up
-f.close()
-output.flush()
-ms.close()
+   # tidy up
+   f.close()
+   output.flush()
+   ms.close()

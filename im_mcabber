@@ -1,16 +1,9 @@
 #!/bin/ksh
-#
-# Sample events script for mcabber
-# Plays a sound when receiving a message
-#
-# To use this script, set the "events_command" option to the path of
-# the script (see the mcabberrc.example file for an example)
+# Sample events script for mcabber, for use with dzen
 #
 # MiKael, 2005-07-15
+# Stefan Marsiske <stefan.marsiske@gmail.com>, 2008
 
-# The following sound comes with the gtkboard package,
-# you can modify this line to play another one...
-CMD_MSG_IN="/usr/bin/aplay /usr/share/sounds/KDE_Notify.wav"
 # $1 is the event type (MSG, STATUS)
 # $2 for messages is IN, OUT
 # $3 is the jid
@@ -24,7 +17,6 @@ filename=$4
 # and when 'event_log_files' is set.
 
 [[ $event == "MSG" ]] && [[ $arg1 = "IN" ]] && {
-   $CMD_MSG_IN > /dev/null 2>&1
    [[ -n "$filename" ]]  && [[ -f "$filename" ]] && {
      # We could process filename here...
      . $HOME/.munchrrc

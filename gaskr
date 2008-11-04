@@ -77,10 +77,8 @@ class GUI:
 
    def enter_callback(self, widget=None, data=None):
       inputs={}
-      # TODO implement inputs=self.form, so that yaml.dump(self.form) is only
-      # ammended with the appropriate values set.
-      # we want this, so we can send this to our feedr, which dispatches the
-      # request to the web service. 
+      # we can send this to feedr, which dispatches the request to the web
+      # service. 
       if(data and data.has_key('name')):
          # set param with the name of the submit button pushed
          inputs[data['name']]=data['name']
