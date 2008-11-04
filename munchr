@@ -16,9 +16,9 @@ except ImportError: # quick semi-nasty fallback for non-windows/win32com case
    homedir = os.path.expanduser("~")
 
 # TODO config
-STORAGE="/home/stef/.config/munchr/rsscache/"
-DZENPIPE="/home/stef/.config/munchr/notifications"
-FEEDLIST=homedir+'/.feedmunchr'
+STORAGE=homedir+"/.config/munchr/rsscache/"
+DZENPIPE=homedir+"/.config/munchr/notifications"
+FEEDLIST=homedir+"/.config/munchr/feeds"
 
 def hash(data):
    return hashlib.sha1(data).hexdigest()
