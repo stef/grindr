@@ -1,39 +1,164 @@
+munchr + friends
+================
+various utils to enhance web2.0 productivity. Munchr provides tools to interact
+with websites, rss feeds and instant messaging: 
+      * nbox is a general widget for displaying information
+      * munchr fetches rss feeds (possibly to nbox)
+      * wachr combines nbox&munchr for your convenience
+      * im_mcabber&pidgin feed IM messages to nbox
+      * feedr POSTs data to websites
+      * gaskr is an input widget, that interacts with feedr
+      * bildr helps prepare gaskr configurations 
+
+Keep it simple stupid was the main goal, so all components do only one thing.
+You can mix and match the functionality to suit your needs. If you don't like
+the looks of gaskr it is easy to write another GUI frontend. Or you don't like
+dzen? Your OS has something similar? Use that if you prefer.
+
+Generally speaking for output you will probably have a wachr running, which
+polls rss feeds (munchr) and displays (nbox) various incomming information in
+the dzen window.  For input related tasks you will end up with a bunch of
+desktop or keyboard shortcuts to gaskr/feedr invocations.
+
+So which websites could be integrated more thightly into your desktop?
+
+Availability
+============
+munchr+friends is released under the *GPLv3* and avaible via git:
+git clone git://github.com/stef/munchr.git
+
+the script itself is very short, 
+"download it directly":http://github.com/stef/munchr/tarball/v0.3
+
+wow, another flexible framework, so what?
+=========================================
+sure it is a framework, but i am using it for daily work. 
+
+Using munchr I monitor a bunch of work related rss feeds (document changes in
+various document management systems, new sw releases, svn updates, etc), all
+information this is fed into the nbox.
+
+Usually I am using mcabber for my rather minimal instant messaging needs, so
+any new messages addressed at me, shows up also in the nbox.
+
+I use gaskr/feedr to submit new ideas, appointments and tasks into my online
+todo list, which is based on the great tikiwiki and its trackers.
+
+installation 
+============
+   * dependencies
+     apt-get install ksh dzen2 imagemagick python2.5 python-magic python-feedparser python-yaml python-4suite-xml python-dbus python-egenix-mxdatetime
+   * use ./setup 
+
+related files
+-------------
+   * doc/munchrrc
+      basic configuration for all compontents
+   * setup
+      script to setup all files, directories and pipes for basic functioning.
+
+Getting Information
+===================
+
+nbox
+----
+This is is the widget displaying the various informations gathered by other
+utilities.
+
+nbox waits for informationnotifications and displays them in a dzen widget at
+the bottom right of your screen. Hover over the widget and you get a scrollable
+backlog of all previous events. Comming up, klicking on events makes something
+meaningful.
+
 munchr
-======
-   scripts for feeding dzen with im and rss items.
+------
+Reads the contents of ~/.config/munchr/feeds, gets each feed and emits the new
+items to nbox
 
-dependencies
-------------
-   apt-get install dzen2 imagemagick python2.5 python-magic python-feedparser python-yaml
+munchr can access sites using the HTTP Basic Authentication mechanism, so you
+can also use munchr on restricted sites.
 
-usage in five easy steps
-------------------------
-    * take care of the dependencies above!
-    * use ./setup or copy manually: cp munchrrc ~/.munchrrc
-    * run nbox, so it can poll the pipe.
-    * mcabber should be configured to the comments below, im messages should
-      appear in the nbox accompanied by a sound.
-    * if you run feedmunchr it will fetch the feeds and send any new items to
-      nbox none of the above need any parameters on the commandline.
-
-files
+wachr
 -----
-* im_mcabber*
-   can be used by mcabber by setting in ~/.mcabberrc
-      set events_command = <path>im_mcabber
-      set event_log_files = 1
-      set event_log_dir = ~/.mcabber/event_files
-   make sure, that ~/.mcabber/event_files exists:
-      mkdir -p ~/.mcabber/event_files
-* nbox
-   polls the notifications and displays them in a dzen widget at the bottom
-   right of your screen. hover over the widget and you get a scrollable backlog
-   of all previous events. comming up, klicking on events makes something
-   meaningful.
-* feedmunchr.py
-   reads the contents of ~/.feedmunchr, gets each feed and emits the new items
-   to nbox
-* munchrrc
-   basic configuration for all compontents
-* setup
-   script to setup all files, directories and pipes for basic functioning.
+wachr is a convenience wrapper around nbox and munchr. wachr starts an nbox and
+polls munchr every 2 minutes.
+
+pidgin
+------
+pidgin is an experimental feature to route pidgin/purple IM messages to nbox.
+
+im_mcabber
+----------
+im_mcabber routes IM messages from mcabber to nbox. mcabber needs to be
+configured to use im_mcabber by setting in ~/.mcabberrc:
+   set events_command = <pathto>im_mcabber
+   set event_log_files = 1
+   set event_log_dir = ~/.mcabber/event_files
+make sure, that ~/.mcabber/event_files exists:
+   mkdir -p ~/.mcabber/event_files
+
+Giving Information
+==================
+
+feedr
+----
+feedr submits values via HTTP GET/POST requests to servers. 
+
+feedr gets the data to be submitted via files and standard input. The format is
+based on YAML (yet another meta language iirc).
+
+feedr parses the output according to a specified xpath expression, matches
+printed on completion.
+
+feedr config files can be used to automate tasks that don't need user input. It
+is also possible to store login credentials in such files. These files can then
+be used to login to protected sites using the '-l <feedr.cfg>' parameter. 
+   { action: 'https://www.example.com/tiki-login.php',
+      resultxpath: 'string(//h:div[@class="simplebox error"]/text())',
+      postfields: {
+         user: mstef,
+         pass: password,
+      }
+   }
+
+gaskr
+-----
+gaskr is a graphical frontend to feedr. 
+
+gaskr parses a YAML configfile and displays the corresponding graphical input
+form. After submission of the form gaskr formats the results so that feedr can
+send it to the webserver.
+
+gaskr configfiles always have 'resultpath', 'action' and 'fields' values. 
+
+here is an example of cfgs/gaskr/google:
+
+   resultxpath: '//h:h3[@class="r"]/h:a'
+   action: 'http://www.google.com/search'
+   fields: [ 
+      { type: hidden, name: hl, value: en, },
+      { type: text, label: Google Search, name: q, primari: 1},
+      { type: submit, name: btnG, value: Google Search, },
+      { type: submit, name: btnI, value: I'm Feeling Lucky, }, 
+      ]
+
+bildr
+-----
+bildr helps you prepare configfiles for gaskr. bildr connects to the webserver
+and dumps all forms found on the page.
+
+bildr accepts a '-l <feedr.cfg>' parameter, so it can help build config files
+for gaskr.
+
+In the example below I prepare a configfile for an authenticated webbased task
+application:
+   ./bildr -l cfgs/feedr/company.site.login 'https://www.example.com/tiki-view_tracker.php?trackerId=3' >cfgs/gaskr/company.addtodo
+
+the result can be edited, e.g. 
+   * non-important fields deleted or
+   * hide static values
+
+Examples
+========
+complex example, query google feed results to nbox:
+   ./gaskr <cfgs/gaskr/google | ./feedr -n | sed 's/^$/<br \/>/' >/tmp/asdf.html && links2 -dump /tmp/asdf.html >>~/.config/munchr/notifications && rm /tmp/asdf.html

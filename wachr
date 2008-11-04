@@ -1,5 +1,6 @@
 #!/bin/sh
 
+#TODO: config, cfg 
 check_interval=120
 
 shutdown() {
