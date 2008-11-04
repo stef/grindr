@@ -25,7 +25,6 @@ So which websites could be integrated more thightly into your desktop?
 Availability
 munchr+friends is released under the GPLv3 and avaible via git:
    git clone git://github.com/stef/munchr.git
-the script itself is very short, download it directly
 
 wow, another flexible framework, so what?
 sure it is a framework, but i am using it for daily work.
