@@ -3,17 +3,18 @@ import getopt, sys, yaml
 from workr import fetch, VERSION
 
 DEBUG=None
+NOPOST=None
 
 def usage():
    print "feedr", VERSION
-   print "usage: feedr [<actionfiles>]"
+   print "usage: feedr [--debug] [--nopost] [<actionfiles>]"
    print ""
-   print "either supply actions via stdin or in actionfiles"
+   print "actions can be either supplied via stdin or files"
 
 if(__name__=="__main__"):
    # handling of options
    try:
-      opts, args = getopt.getopt(sys.argv[1:], "hd", ["help","debug"])
+      opts, args = getopt.getopt(sys.argv[1:], "hdn", ["help","debug","nopost"])
    except getopt.GetoptError:
       usage()
       sys.exit(2)
@@ -23,24 +24,25 @@ if(__name__=="__main__"):
          sys.exit()
       if o in ("-d","--debug"):
          DEBUG=1
+      if o in ("-n","--nopost"):
+         NOPOST=1
    if(len(args)>0):
       # process each url specified 
       for action in args:
          sys.stderr.write("processing "+action+'\n')
          try:
-            loginparams = yaml.load(file(action, 'r'))
+            params = yaml.load(file(action, 'r'))
          except yaml.YAMLError, exc:
             print "Error in configuration file:", exc
             sys.exit(1)
-         result,xhtml=fetch(loginparams,debug=DEBUG)
-         print result
    else:
       # we need to process stdin
-      sys.stderr.write("processing stdin\n")
+      if(DEBUG): sys.stderr.write("processing stdin\n")
       try:
-         loginparams = yaml.load(sys.stdin.read())
+         params = yaml.load(sys.stdin.read())
       except yaml.YAMLError, exc:
          print "Error in configuration file:", exc
          sys.exit(1)
-      result,xhtml=fetch(loginparams,debug=DEBUG)
-      print result
+   result,xhtml=fetch(params,debug=DEBUG,nopost=NOPOST)
+   print result
+   if(DEBUG): sys.stderr.write(xhtml)
