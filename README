@@ -137,10 +137,22 @@ here is an example of cfgs/gaskr/google:
    action: 'http://www.google.com/search'
    fields: [ 
       { type: hidden, name: hl, value: en, },
-      { type: text, label: Google Search, name: q, primari: 1},
+      { type: text, label: Google Search, name: q, primary: 1},
       { type: submit, name: btnG, value: Google Search, },
       { type: submit, name: btnI, value: I'm Feeling Lucky, }, 
       ]
+
+resultpath should be an xpath expression to the relevant part of the responese.
+action: this field contains the url to the webservice
+fields: contains a list of fields, these can be choices:
+   { type: select, name: choice, options: [ Code, Commit Messages, Author, Committer,  ], primary: 1 },
+or buttons (type: 'submit'), text, textareas:
+   { type: textarea, name: description, label: Details, primary: 0},
+files, radiobuttons and checkboxes are not yet supported. :(
+
+also note, that there is a primary attribute to most fields. this indicates
+whether the field is directly displayed or only on request. This is to reduce
+clutter on the GUI.
 
 bildr
 -----
@@ -156,7 +168,7 @@ application:
 
 the result can be edited, e.g. 
    * non-important fields deleted or
-   * hide static values
+   * supply static values in hidden fields
 
 Examples
 ========

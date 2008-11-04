@@ -1,0 +1,9 @@
+resultxpath: '//h:h3[@class="r"]/h:a'
+action: 'http://www.google.com/search'
+fields: [ 
+   { type: hidden, name: hl, value: en, },
+   { type: text, label: Google Search, name: q, primari: 1},
+   { type: submit, name: btnG, value: Google Search, },
+   { type: submit, name: btnI, value: I'm Feeling Lucky, }, 
+   ]
+
